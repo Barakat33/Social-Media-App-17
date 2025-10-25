@@ -3,9 +3,10 @@ import { Model, RootFilterQuery,ProjectionType, QueryOptions, MongooseUpdateQuer
 
 export abstract class AbstractRepostory<T>{ 
     constructor(protected model:Model<T>) {}
-    async create(item:Partial <T>): Promise<T & Document> {
+
+    async create(item:Partial <T>) {
         const doc = new this.model(item);
-        return await doc.save() as unknown as T & Document;
+        return await doc.save() as Document<T>;
     }
 
     async getOne(

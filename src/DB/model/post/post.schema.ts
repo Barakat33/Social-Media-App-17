@@ -25,7 +25,10 @@ export const postSchema = new Schema<IPost>(
         ref: "Attachment",
       },
     ],
-    reactions: [reactionSchema],     
+    reactions: [reactionSchema], 
+    isFrozen: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    
   },
   { timestamps: true ,toJSON:{virtuals:true},toObject:{virtuals:true}}
 );

@@ -2,13 +2,20 @@ import { z } from "zod";
 import { GENDER } from "../../utlis/common/enum";
 
 // Register Validation
-export const registerSchema = z.object({
-  fullName: z.string().min(2).max(20),
-  email: z.string().email(),
-  password: z.string().min(6), // على الأقل 6 حروف
-  phoneNumber: z.string().optional(),
-  gender: z.nativeEnum(GENDER),
-});
+export const registerSchema = z
+  .object({
+    firstName: z.string().min(2).max(20).optional(),
+    lastName: z.string().min(2).max(20).optional(),
+    fullName: z.string().min(2).optional(),
+    email: z.string().email(),
+    password: z.string().min(6),
+    phoneNumber: z.string().optional(),
+    gender: z.nativeEnum(GENDER),
+  })
+  .refine(
+    (data) => Boolean(data.fullName) || (Boolean(data.firstName) && Boolean(data.lastName)),
+    { message: "Provide either fullName or both firstName and lastName" }
+  );
 
 // Login Validation
 export const loginSchema = z.object({
@@ -19,5 +26,5 @@ export const loginSchema = z.object({
 // Confirm Email Validation
 export const confirmEmailSchema = z.object({
   email: z.string().email(),
-  otp: z.string().length(6), // OTP 6 أرقام
+  otp: z.string().length(6),
 });

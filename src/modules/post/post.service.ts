@@ -83,6 +83,69 @@ class PostService {
         data:{postExist}
     })
 }
+
+//freeze post
+public freezePost = async (req: Request, res: Response) => {
+    // get data from req
+    const { id } = req.params;
+    // check post exist
+    const postExist = await this.postRepository.exist({ _id: id });
+    if (!postExist) throw new NotFoundException("post not found");
+    // check if post owner is the same as the user
+    if (postExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+      throw new NotAuthorizedException("You are not authorized to freeze this post");
+    // freeze post
+    await this.postRepository.update({ _id: id }, { isFrozen: true });
+    // send response
+    res.status(200).json({
+      message: "post frozen successfully",
+      success: true,
+      data: { postExist },
+    });
+  };
+
+  //hard delete post
+  public hardDeletePost = async (req: Request, res: Response) => {
+    // get data from req
+    const { id } = req.params;
+    // check post exist
+    const postExist = await this.postRepository.exist({ _id: id });
+    if (!postExist) throw new NotFoundException("post not found");
+    // check if post owner is the same as the user
+    if (postExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+      throw new NotAuthorizedException("You are not authorized to hard delete this post");
+    // hard delete post
+    await this.postRepository.delete({ _id: id });
+    // send response
+    res.status(200).json({
+      message: "post hard deleted successfully",
+      success: true,
+      data: { postExist },
+    });
+  };
+
+  //update post
+  public updatePost = async (req: Request, res: Response) => {
+    // get data from req
+    const { id } = req.params;
+    const {content} = req.body;
+
+    // check post exist
+    const postExist = await this.postRepository.exist({ _id: id });
+    if (!postExist) throw new NotFoundException("post not found");
+    // check if post owner is the same as the user
+    if (postExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+      throw new NotAuthorizedException("You are not authorized to update this post");
+    if (postExist.isFrozen) throw new NotAuthorizedException("You are not authorized to update this post");
+    // update post
+    const updatedPost= await this.postRepository.update({ _id: id }, { content: content??postExist.content });
+    // send response
+    res.status(200).json({
+      message: "post updated successfully",
+      success: true,
+      data: { updatedPost },
+    });
+  };
 }
 
 export default new PostService();

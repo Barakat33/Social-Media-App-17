@@ -33,8 +33,6 @@ private readonly commentRepository = new CommentRepository();
         commentExist);
     //save in DB
     const cretedComment =await this.commentRepository.create(comment);
-    cretedComment.parentId ;
-    cretedComment.markModified("parentId")
     //send response
     res.status(201).json({
         message:"comment created successfully",
@@ -104,5 +102,86 @@ private readonly commentRepository = new CommentRepository();
         );
         res.sendStatus(204);
     }
+
+    //freeze comment
+    public freezeComment = async (req: Request, res: Response) => {
+        // get data from req
+        const { id } = req.params;
+        // check comment exist
+        const commentExist = await this.commentRepository.exist({ _id: id });
+        if (!commentExist) throw new NotFoundException("comment not found");
+        // check if comment owner is the same as the user
+        if (commentExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+          throw new NotAuthorizedException("You are not authorized to freeze this comment");
+        // freeze comment
+        await this.commentRepository.update({ _id: id }, { isFrozen: true });
+        // send response
+        res.status(200).json({
+          message: "comment frozen successfully",
+          success: true,
+          data: { commentExist },
+        });
+      };
+
+
+      //hard delete comment
+      public hardDeleteComment = async (req: Request, res: Response) => {
+        // get data from req
+        const { id } = req.params;
+        // check comment exist
+        const commentExist = await this.commentRepository.exist({ _id: id });
+        if (!commentExist) throw new NotFoundException("comment not found");
+        // check if comment owner is the same as the user
+        if (commentExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+          throw new NotAuthorizedException("You are not authorized to hard delete this comment");
+        // hard delete comment
+        await this.commentRepository.delete({ _id: id });
+        // send response
+        res.status(200).json({
+          message: "comment hard deleted successfully",
+          success: true,
+          data: { commentExist },
+        });
+      };
+
+      //update comment
+      public updateComment = async (req: Request, res: Response) => {
+        // get data from req
+        const { id } = req.params;
+        const { content } = req.body;
+        // check comment exist
+        const commentExist = await this.commentRepository.exist({ _id: id });
+        if (!commentExist) throw new NotFoundException("comment not found");
+        // check if comment owner is the same as the user
+        if (commentExist.userId.toString() !== (req as IAuthUser).user._id.toString())
+          throw new NotAuthorizedException("You are not authorized to update this comment");
+        
+        if(commentExist.isFrozen) throw new NotAuthorizedException("You are not authorized to update this comment");
+        // update comment
+        const updatedComment = await this.commentRepository.update({ _id: id }, { content: content ?? commentExist.content });
+        // send response
+        res.status(200).json({
+          message: "comment updated successfully",
+          success: true,
+          data: { updatedComment },
+        });
+      };
+
+      //get comment by id
+      public getCommentById = async (req: Request, res: Response) => {
+        // get data from req
+        const { id } = req.params;
+        // check comment exist
+        const commentExist = await this.commentRepository.exist({ _id: id });
+        if (!commentExist) throw new NotFoundException("comment not found");
+        // get comment
+        const comment = await this.commentRepository.getOne({ _id: id });
+        // send response
+        res.status(200).json({
+          message: "done",
+          success: true,
+          data: { comment },
+        });
+      };
 }
 export default new CommentService();

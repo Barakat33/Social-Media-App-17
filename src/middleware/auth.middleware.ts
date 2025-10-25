@@ -9,7 +9,8 @@ export const isAuthenticated = (): RequestHandler => {
     const token = req.headers.authorization as string;
     const payload = verifyToken(token);
     const userRepository = new UserRepository();
-    const user = await userRepository.exist({ _id: (payload as any)._id });
+    const user = await userRepository.exist({ _id: (payload as any)._id },{},
+    {populate:[{path:"friends",select:"fullName firstName lastName"}]});
     if (!user) {
       throw new NotFoundException("User not found");
     }

@@ -1,6 +1,21 @@
 import { NextFunction,Request,Response } from "express"
 import { BadRequestException } from "../utlis"
 import { ZodType } from "zod"
+import Joi from "joi";
+
+export const generalFiled={
+    id: Joi.string().length(24).hex().required(),
+    attachment: Joi.object().required(),
+    //file information
+    filedName: Joi.string().required(),
+    originalName: Joi.string().required(),
+    encoding: Joi.string().required(),
+    mimeType: Joi.string().required(),
+    destination: Joi.string().required(),
+    filename: Joi.string().required(),
+    size: Joi.number().required(),
+    path: Joi.string().required(),
+}
 
 export const isvalid = (schema:ZodType) => {
     return (req: Request, res: Response, next: NextFunction) => {

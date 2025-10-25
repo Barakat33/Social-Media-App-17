@@ -13,5 +13,10 @@ router.patch("/:id",isAuthenticated(),postService.addReaction);
 router.get("/:id",postService.getSpecific);
 router.delete("/:id",isAuthenticated(),postService.deletePost);
 
+router.patch("/:id/freeze", isAuthenticated(), postService.freezePost);
+router.delete("/:id/hard", isAuthenticated(), postService.hardDeletePost);
+router.patch("/:id/update", isAuthenticated(), postService.updatePost);
+
+
 
 export default router;

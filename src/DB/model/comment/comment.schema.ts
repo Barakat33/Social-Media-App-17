@@ -20,6 +20,9 @@ export const commentSchema = new Schema<IComment>(
             required:false,
             default: null
             },
+        isFrozen: { type: Boolean, default: false },
+        isDeleted: { type: Boolean, default: false },
+
         content :{type:String},
         reactions:[reactionSchema],
     },
@@ -32,14 +35,15 @@ commentSchema.virtual("replies", {
     foreignField:"parentId"
     });
 
-    commentSchema.pre("deleteOne",async function(next){
-        const filter =typeof this.getFilter() === "function"? this.getFilter() : {};
-        const repiles =await this.model.find({parentId:filter._id})
-        if(repiles.length){
-            for (const reply of repiles){
-                await reply.deleteOne({_id:reply._id });
-            }
-        }
-        next(); //basecase
-    })
+    commentSchema.pre("deleteOne", async function (next) {
+  const filter = this.getFilter ? this.getFilter() : {};
+  const replies = await new this.model("Comment").find({ parentId: filter._id });
+  if (replies.length) {
+    for (const reply of replies) {
+      await reply.deleteOne({ _id: reply._id });
+    }
+  }
+  next(); // base case
+});
+
     

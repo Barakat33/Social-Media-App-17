@@ -23,15 +23,36 @@ export interface IUser {
   otpExpiry?: Date | undefined;
   isVerified: boolean;
   _id: Types.ObjectId;
+  friends: Types.ObjectId[];
+  blockedUsers?: Types.ObjectId[];
+  isBlocked?: boolean;
+  friendRequests?: Types.ObjectId[];
 }
 
 export interface IComment{
   userId: Types.ObjectId;
   postId: Types.ObjectId;
   parentId?: Types.ObjectId | null; // nullable for top-level comments
+  content?: string;
   attachments?: IAttachment[];
   reactions: IReaction[];
   mentions?: Types.ObjectId[]; 
+  isFrozen?: boolean;
+  isDeleted?: boolean;
+}
+
+export interface IMessage {
+  readonly _id:ObjectId,
+  content:string;
+  sender:ObjectId,
+  attachments?:IAttachment[],
+  reactions:IReaction[],
+}
+
+export interface IChat {
+  readonly _id:ObjectId,
+  users:ObjectId[],
+  messages:ObjectId[],
 }
 
 export interface IPayload extends JwtPayload {
@@ -54,6 +75,8 @@ export interface IPost {
   content: string;
   reactions: IReaction[];
   attachments?: IAttachment[];
+  isFrozen?: boolean;
+  isDeleted?: boolean;
 }
 
 declare module "jsonwebtoken" {

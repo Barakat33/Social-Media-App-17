@@ -50,6 +50,8 @@ userAgent: {
   enum: Object.values(USER_AGENT),
   default: USER_AGENT.local, // لازم رقم
 },
+isOnline: { type: Boolean, default: false },
+
     isVerified: { type: Boolean, default: false },
     otp: { type: String },
     otpExpiry: { type: Date },

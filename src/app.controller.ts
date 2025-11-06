@@ -4,6 +4,9 @@ import { connectDB } from "./DB/connection";
 import { AppError } from "./utlis/error";
 import cors from "cors";
 import chatRouter from "./modules/chat/chat.controller";
+import { appSchema } from "./app.chema";
+import { createHandler } from "graphql-http";
+import { GraphQLError } from "graphql";
 
 export function bootstrap(app: Express, express: any) {
   connectDB(); // operation buffering
@@ -26,6 +29,44 @@ export function bootstrap(app: Express, express: any) {
 
   // chat
   app.use("/chat", chatRouter);
+
+  app.all(
+  "/graphql",
+  createHandler({
+    schema: appSchema,
+    formatError: (err) => {
+      const error = err instanceof GraphQLError ? err : new GraphQLError(err.message);
+
+      return new GraphQLError(
+        error.message,
+        error.nodes ?? undefined,
+        error.source ?? undefined,
+        error.positions ?? undefined,
+        error.path ?? undefined,
+        error.originalError ?? undefined,
+        {
+          ...error.extensions,
+          success: false,
+          code: error.extensions?.code || "GRAPHQL_ERROR",
+          originalError:
+            error.originalError instanceof Error
+              ? error.originalError.message
+              : null,
+        }
+      );
+    },
+    //implement of auth function
+    context: (req) => {
+      const rawAuth =
+        typeof req.headers?.get === "function"
+          ? req.headers.get("authorization")
+          : (req.headers as any)?.authorization ?? (req as any)?.headers?.authorization;
+      const auth = Array.isArray(rawAuth) ? rawAuth[0] : rawAuth;
+      const token = auth && typeof auth === "string" && auth.startsWith("Bearer ") ? auth.slice(7) : (typeof auth === "string" ? auth : null);
+      return { token };
+    },
+  })
+);
 
   // 404 handler - catch all unhandled routes
   app.all(/.*/, (req: Request, res: Response) => {

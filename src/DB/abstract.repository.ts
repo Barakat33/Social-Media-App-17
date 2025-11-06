@@ -40,6 +40,14 @@ export abstract class AbstractRepostory<T>{
         await this.model.deleteOne(filter);
     }
 
+    async getAll(
+        filter:RootFilterQuery<T>,
+        Projection?:ProjectionType<T>,
+        Options?:QueryOptions<T>
+    ) {
+        return await this.model.find(filter,Projection,Options); 
+    }
+
     
 }
     

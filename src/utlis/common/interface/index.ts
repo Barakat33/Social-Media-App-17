@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { GENDER, REACTION, SYS_ROLE, USER_AGENT } from "../enum";
 import { Request } from "express";
 import { Document, ObjectId, Types } from "mongoose";
+
 export interface IAttachment {
   url: string;
   id: string;
@@ -27,6 +28,7 @@ export interface IUser {
   blockedUsers?: Types.ObjectId[];
   isBlocked?: boolean;
   friendRequests?: Types.ObjectId[];
+  isOnline?: boolean;
 }
 
 export interface IComment{
@@ -84,4 +86,14 @@ declare module "jsonwebtoken" {
     _id: string;
     role: number;
   }
+}
+
+
+declare module "graphql" {
+  interface GraphQLError{
+    message:string;
+    success:boolean;
+    errorDetails:any 
+    errorMessage:string;
+  } 
 }
